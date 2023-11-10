@@ -367,6 +367,7 @@
     temperaturePerturbationZones.perturb(T);
 
 
+    /*
     // - Wind turbine actuator line/disk array [m/s^2].
     Info << "Creating actuator disk/line wind turbine array" << endl;
     turbineModels::horizontalAxisWindTurbinesALMOpenFAST actuatorTurbineArray(U);
@@ -378,6 +379,7 @@
     //    Wind Energy Association (EWEA), 2008.
     //
     bool bodyForceStabilization = mesh.schemesDict().lookupOrDefault<bool>("bodyForceStabilization",true);
+    */
     
     
     // - User set fvOptions, such as additional source terms.
