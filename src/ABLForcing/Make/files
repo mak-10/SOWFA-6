@@ -4,5 +4,6 @@ buoyancyModel/buoyancyModel.C
 drivingForce/drivingForces.C
 perturbationZone/perturbationZones.C
 hurricaneSource/hurricaneSource.C
+windFarmCanopy/windFarmCanopy.C
 
 LIB = $(SOWFA_LIBBIN)/libSOWFAABLForcing

@@ -7,5 +7,6 @@
 #include "spongeLayer.H"
 #include "perturbationZone.H"
 #include "hurricaneSource.H"
+#include "windFarmCanopy.H"
 
 #endif
