@@ -25,7 +25,6 @@ License
 
 #include "windFarmCanopy.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,22 +49,19 @@ void Foam::windFarmCanopy::read()
                                  << "canopy force, 'cellSetName'."
                                  << abort(FatalError);
         }
-        if (!subDict.found("R"))
-        {
-            FatalErrorInFunction << "Must specify radius from center of hurricane, 'R'."
-                                     << abort(FatalError);
-        }
 
        
         cellSetName_ = subDict.lookupOrDefault<word>("cellSetName","windFarmCanopyCellSet");
         cellSet_ = cellSet(mesh_,cellSetName_).toc();
 
-        CtTable_(Function1<scalar>::New("CtTable",subDict));
+       // CtTable_(Function1<scalar>::New("CtTable",subDict));
 
-        R = subDict.lookupOrDefault<scalar>("R",40.0E3);
+        Cft_ = subDict.lookupOrDefault<scalar>("Cft",0.074);
+	canopyHeight_ = subDict.lookupOrDefault<scalar>("canopyHeight",100);
 
-        Info << "  -using values:" << endl;
-        Info << "      R = " << R/1000.0 << " km" << endl;
+	Info << "  -using values:" << endl;
+        Info << "      Cft = " << Cft_ << endl;
+	Info << "      canopy Height = " << canopyHeight_ << endl;
     }
 
     else
@@ -80,30 +76,25 @@ void Foam::windFarmCanopy::update()
 {
     if (active_)
     {
+     	scalar Tc = 0;
+	scalar Vc = 0;
 
-/*
-        // Update the source term.
-        for (int i = 0; i < nLevels; i++)
-        {
-            vector sourceAtLevel = Zero;
+	forAll(cellSet_, i)
+	{
+    		const label cellID = cellSet_[i];
 
-            scalar V = V_surface + (planeHeights[i] * dVdz);
-            scalar dVdR = dVdR_surface + (planeHeights[i] * dVdRdz);
+    		scalar T = 0.5 * sqr(mag(U_[cellID])) * Cft_ * (1 / canopyHeight_);
+    		source_[cellID] -= T * (U_[cellID] / mag(U_[cellID]));
+    		Tc += 1.225 * T * Vcells_[cellID];
+		Vc += Vcells_[cellID];
+	}
 
-            sourceAtLevel.x() =  Foam::sqr(Ubar[i].x()) / R
-                                +Ubar[i].y() * (V/R)
-                                -(f*V + (Foam::sqr(V) / R));
-            sourceAtLevel.y() = -Ubar[i].x() * dVdR
-                                -Ubar[i].x() * (V/R);
+	source_.correctBoundaryConditions();
 
-          //Info << planeHeights[i] << tab << V_surface << tab << dVdR_surface << tab << V << tab << dVdR << tab << sourceAtLevel << endl;
+	reduce(Tc, sumOp<scalar>());
+	Info << "Total Thrust in Canopy" << Tc << endl;
+	Info << "Total Volume of Canopy" << Vc << endl;
 
-            forAll(cellsInPlane[i], j)
-            {
-                source_[cellsInPlane[i][j]] = sourceAtLevel;
-            }
-        }
-*/
     }
 }
 
@@ -127,6 +118,7 @@ Foam::windFarmCanopy::windFarmCanopy
     // Set the pointer to the velocity field
     U_(U),
 
+    active_(false),
     // Initialize the body force field
     source_
     (
@@ -136,16 +128,32 @@ Foam::windFarmCanopy::windFarmCanopy
             runTime_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE // NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedVector("bodyForce",dimVelocity/dimTime,vector::zero)
-    ),
+        dimensionedVector("bodyForce", dimVelocity/dimTime, vector::zero)
+    )
 
-    active_(false)
+    //Vcells_(
+    //    IOobject
+    //    (
+    //        "Vcells",
+    //        runTime_.timeName(),
+    //        mesh_,
+    //        IOobject::MUST_READ,
+    //        IOobject::AUTO_WRITE
+    //    ),
+    //    mesh_,
+    //    dimensionedScalar("cellVolume", dimVolume, 0.0)
+   // )
+
+    //active_(false)
 {
     read();
     update();
+
+    // Extract scalar field from mesh_.V() and assign it to Vcells_
+    Vcells_ = mesh_.V();
 }
 
 

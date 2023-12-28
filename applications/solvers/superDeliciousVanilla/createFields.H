@@ -347,7 +347,14 @@
     Info << "Creating G. Bryan's 'simple' hurricane source term" << endl;
     hurricaneSource hurricaneMesoTerm(ABLProperties, U, Coriolis);
     
+   // - windFarmCanopy source term [m/s^2].
+    Info << "Creating wind Farm Canopy source term" << endl;
+    windFarmCanopy windFarmCanopy(ABLProperties, U);
     
+
+    // wind Farm Canopy stabilization
+    bool windFarmCanopyStabilization = mesh.schemesDict().lookupOrDefault<bool>("windFarmCanopyStabilization",true);
+
     // - Buoyancy term [m/s^2].
     Info << "Creating buoyancy term" << endl;
     buoyancyModel Boussinesq(T, TRef, hRef, g, ABLProperties);

@@ -15,7 +15,8 @@
 
     // This is the actuator line/disk body force term multiplied by the inverse of the A operator.
   //surfaceScalarField phiF(rAUf * scalar(bodyForceStabilization) * fvc::flux(actuatorTurbineArray.source()));
-
+   
+     surfaceScalarField phiWfc(rAUf * scalar(windFarmCanopyStabilization) * fvc::flux(windFarmCanopy.source()));
     // Project HbyA to cell faces and apply a correction for time stepping scheme.
     surfaceScalarField phiHbyA
     (
@@ -42,6 +43,7 @@
 
     phiHbyA += phig;
   //phiHbyA += phiF;
+    phiHbyA += phiWfc;
 
     // Update the fixedFluxPressure BCs to ensure flux consistency
     setSnGrad<fixedFluxPressureFvPatchScalarField>
@@ -84,7 +86,8 @@
                                               ( 
                                                  phig 
                                                //+phiF 
-                                                 -p_rghEqn.flux() 
+                                                 +phiWfc 
+						 -p_rghEqn.flux() 
                                               )/rAUf
                                            );
             U.correctBoundaryConditions();

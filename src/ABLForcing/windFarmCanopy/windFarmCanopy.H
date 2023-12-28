@@ -73,14 +73,18 @@ class windFarmCanopy
         //- Body force field of terms specific to wind-farm canopy.
         volVectorField source_;
 
+	// scalar to access the cell volumes of the cellSet or canopy
+	scalarField  Vcells_;
+
         bool active_;
 
         //- Parameters for the wind-farm canopy.
         word cellSetName_;
         List<label> cellSet_;
-        autoPtr<Function1<scalar> > CtTable_;
-        scalar R;
-
+        //autoPtr<Function1<scalar> > CtTable_;
+        scalar Cft_;
+	scalar canopyHeight_;
+	scalar rho_;
 
 
 

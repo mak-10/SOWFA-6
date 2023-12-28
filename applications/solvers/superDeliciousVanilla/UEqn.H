@@ -15,7 +15,9 @@
       + momentumPerturbationZones.source()
     //+ (1.0 - scalar(bodyForceStabilization)) * actuatorTurbineArray.source()
       + fvOptions(U)
-    );
+      //+ windFarmCanopy.source()
+      + (1.0 - scalar(windFarmCanopyStabilization)) * windFarmCanopy.source()
+     );
 
     UEqn.relax();
 
@@ -33,7 +35,8 @@
                   - fvc::snGrad(p_rgh)
                   + Boussinesq.source()
                 //+ scalar(bodyForceStabilization) * fvc::flux(actuatorTurbineArray.source())/mesh.magSf()
-                )*mesh.magSf()
+                  + scalar(windFarmCanopyStabilization) * fvc::flux(windFarmCanopy.source())/mesh.magSf()
+		)*mesh.magSf()
             )
         );
 
